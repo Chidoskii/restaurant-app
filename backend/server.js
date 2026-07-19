@@ -61,6 +61,14 @@ app.get("/api/health", async (_req, res, next) => {
   }
 });
 
+app.get("/", (_req, res) => {
+  res.json({
+    service: "Okpara's Cafe API",
+    status: "online",
+    version: "1.0.0",
+  });
+});
+
 app.use("/api/menu", menuRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/orders", orderRoutes);

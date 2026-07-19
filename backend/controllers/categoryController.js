@@ -1,19 +1,9 @@
-const { pool } = require("../db");
+const categoryService = require("../services/categoryService");
 
 async function getCategories(_req, res, next) {
   try {
-    const [rows] = await pool.query(`
-      SELECT
-        id,
-        name,
-        description,
-        display_order AS displayOrder
-      FROM categories
-      WHERE is_active = TRUE
-      ORDER BY display_order, name
-    `);
-
-    res.json(rows);
+    const categories = await categoryService.findAllCategories();
+    res.json(categories);
   } catch (error) {
     next(error);
   }
@@ -21,26 +11,26 @@ async function getCategories(_req, res, next) {
 
 async function getItemsByCategory(req, res, next) {
   try {
-    const [rows] = await pool.execute(
-      `
-        SELECT
-          id,
-          category_id AS categoryId,
-          name,
-          description,
-          price,
-          image_url AS imageUrl,
-          is_featured AS isFeatured,
-          is_seasonal AS isSeasonal
-        FROM menu_items
-        WHERE category_id = ?
-          AND is_available = TRUE
-        ORDER BY display_order, name
-      `,
-      [req.params.id],
-    );
+    const categoryId = Number(req.params.id);
 
-    res.json(rows);
+    if (!Number.isInteger(categoryId) || categoryId <= 0) {
+      return res.status(400).json({
+        message: "Category ID must be a positive integer",
+      });
+    }
+
+    const exists = await categoryService.categoryExists(categoryId);
+
+    if (!exists) {
+      return res.status(404).json({
+        message: "Category not found",
+      });
+    }
+
+    const items =
+      await categoryService.findItemsByCategoryId(categoryId);
+
+    res.json(items);
   } catch (error) {
     next(error);
   }
