@@ -8,6 +8,8 @@ import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import CartPage from "./pages/CartPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import CheckoutPage from "./pages/CheckoutPage";
+import OrderConfirmationPage from "./pages/OrderConfirmationPage";
 
 function App() {
   return (
@@ -22,6 +24,13 @@ function App() {
         <Route path="/contact" element={<ContactPage />} />
 
         <Route path="/cart" element={<CartPage />} />
+
+        <Route path="/checkout" element={<CheckoutPage />} />
+
+        <Route
+          path="/order-confirmation/:orderId"
+          element={<OrderConfirmationPage />}
+        />
 
         <Route path="*" element={<NotFoundPage />} />
       </Route>
