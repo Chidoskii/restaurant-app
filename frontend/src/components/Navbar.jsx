@@ -1,6 +1,9 @@
 import { NavLink } from "react-router-dom";
+import { useCart } from "../context/CartContext";
 
 function Navbar() {
+  const { cartCount } = useCart();
+
   const getLinkClass = ({ isActive }) =>
     isActive ? "nav-link nav-link-active" : "nav-link";
 
@@ -26,6 +29,11 @@ function Navbar() {
 
           <NavLink to="/contact" className={getLinkClass}>
             Contact
+          </NavLink>
+
+          <NavLink to="/cart" className={getLinkClass}>
+            Cart
+            {cartCount > 0 && <span className="cart-count">{cartCount}</span>}
           </NavLink>
         </div>
       </nav>

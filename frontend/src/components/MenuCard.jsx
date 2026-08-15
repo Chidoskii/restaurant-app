@@ -1,4 +1,8 @@
+import { useCart } from "../context/CartContext";
+
 function MenuCard({ item }) {
+  const { addToCart } = useCart();
+
   const displayedPrice =
     item.specialPrice !== null && item.specialPrice !== undefined
       ? item.specialPrice
@@ -28,6 +32,14 @@ function MenuCard({ item }) {
         <p>{item.description}</p>
 
         {item.specialNote && <p className="special-note">{item.specialNote}</p>}
+
+        <button
+          type="button"
+          className="button button-primary menu-card-button"
+          onClick={() => addToCart(item)}
+        >
+          Add to Cart
+        </button>
       </div>
     </article>
   );

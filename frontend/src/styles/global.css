@@ -415,6 +415,150 @@ p {
   text-align: center;
 }
 
+.menu-card-button {
+  width: 100%;
+  margin-top: 1rem;
+  border: 0;
+}
+
+.cart-count {
+  display: inline-flex;
+  min-width: 20px;
+  height: 20px;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0.35rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: var(--primary);
+  color: white;
+  font-size: 0.7rem;
+}
+
+.cart-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+.cart-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cart-item {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto
+    auto
+    auto;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+}
+
+.cart-item h2 {
+  margin-bottom: 0.25rem;
+  font-size: 1.2rem;
+}
+
+.cart-item p {
+  margin: 0;
+}
+
+.quantity-control {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.quantity-control button {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface);
+}
+
+.quantity-control button:hover {
+  border-color: var(--primary);
+}
+
+.cart-item-total {
+  min-width: 75px;
+  text-align: right;
+}
+
+.remove-button,
+.clear-cart-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #a33b32;
+  font-weight: 600;
+}
+
+.cart-summary {
+  position: sticky;
+  top: 100px;
+  padding: 2rem;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+}
+
+.cart-summary h2 {
+  font-size: 1.4rem;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.summary-note {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.checkout-button {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.clear-cart-button {
+  display: block;
+  margin: 1.25rem auto 0;
+}
+
+@media (max-width: 800px) {
+  .cart-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .cart-summary {
+    position: static;
+  }
+
+  .cart-item {
+    grid-template-columns: 1fr auto;
+  }
+
+  .cart-item-total {
+    text-align: left;
+  }
+}
+
 @media (max-width: 900px) {
   .menu-grid {
     grid-template-columns: repeat(2, 1fr);
