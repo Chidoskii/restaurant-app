@@ -9,7 +9,7 @@ function Footer() {
 
         <div>
           <p>123 Restaurant Street</p>
-          <p>Pomona, California</p>
+          <p>California, USA</p>
           <p>(555) 555-5555</p>
         </div>
       </div>

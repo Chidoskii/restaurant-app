@@ -9,6 +9,7 @@ const menuRoutes = require("./routes/menuRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const authRoutes = require("./routes/authRoutes");
+const businessHoursRoutes = require("./routes/businessHoursRoutes");
 
 const notFound = require("./middleware/notFound");
 const errorHandler = require("./middleware/errorHandler");
@@ -73,6 +74,7 @@ app.use("/api/menu", menuRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/business-hours", businessHoursRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

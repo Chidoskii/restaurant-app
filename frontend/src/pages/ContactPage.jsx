@@ -1,4 +1,44 @@
+import { useEffect, useState } from "react";
+import { getBusinessHours } from "../services/businessHoursService";
+
+const dayNames = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+];
+
+function formatTime(time) {
+  if (!time) return "";
+
+  const [hourString, minute] = time.split(":");
+  const hour = Number(hourString);
+
+  const suffix = hour >= 12 ? "PM" : "AM";
+  const displayHour = hour % 12 || 12;
+
+  return `${displayHour}:${minute} ${suffix}`;
+}
+
 function ContactPage() {
+  const [hours, setHours] = useState([]);
+
+  useEffect(() => {
+    async function loadHours() {
+      try {
+        const data = await getBusinessHours();
+        setHours(data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    loadHours();
+  }, []);
+
   return (
     <section className="section page-section">
       <div className="container">
@@ -11,16 +51,22 @@ function ContactPage() {
           <div className="contact-card">
             <h2>Restaurant Information</h2>
             <p>123 Restaurant Street</p>
-            <p>Pomona, California</p>
+            <p>California, USA</p>
             <p>(555) 555-5555</p>
-            <p>hello@okparas.com</p>
+            <p>chidi@firstbornservices.com</p>
           </div>
 
           <div className="contact-card">
             <h2>Hours</h2>
-            <p>Monday–Thursday: 8:00 AM–8:00 PM</p>
-            <p>Friday–Saturday: 8:00 AM–10:00 PM</p>
-            <p>Sunday: 9:00 AM–6:00 PM</p>
+
+            {hours.map((day) => (
+              <p key={day.dayOfWeek}>
+                <strong>{dayNames[day.dayOfWeek]}:</strong>{" "}
+                {day.isClosed
+                  ? "Closed"
+                  : `${formatTime(day.openTime)}–${formatTime(day.closeTime)}`}
+              </p>
+            ))}
           </div>
         </div>
       </div>

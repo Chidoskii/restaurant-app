@@ -6,8 +6,9 @@ async function createOrder(orderData) {
     customerEmail,
     customerPhone,
     orderType,
+    pickupDate,
+    pickupTime,
     specialInstructions,
-    requestedTime,
     items,
   } = orderData;
 
@@ -242,26 +243,28 @@ async function createOrder(orderData) {
             customer_email,
             customer_phone,
             order_type,
+            pickup_date,
+            pickup_time,
             status,
             subtotal,
             tax,
             total,
-            special_instructions,
-            requested_time
+            special_instructions
           )
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `,
       [
         customerName,
         customerEmail || null,
         customerPhone || null,
         orderType,
+        orderType === "pickup" ? pickupDate : null,
+        orderType === "pickup" ? pickupTime : null,
         "pending",
         subtotal,
         tax,
         total,
         specialInstructions || null,
-        requestedTime || null,
       ],
     );
 
@@ -352,7 +355,8 @@ async function findOrderById(orderId) {
         tax,
         total,
         special_instructions AS specialInstructions,
-        requested_time AS requestedTime,
+        pickup_date AS pickupDate,
+        pickup_time AS pickupTime,
         created_at AS createdAt
       FROM orders
       WHERE id = ?

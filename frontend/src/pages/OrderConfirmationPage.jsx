@@ -4,6 +4,49 @@ import { Link, useParams } from "react-router-dom";
 
 import { getOrderById } from "../services/orderService";
 
+function formatPickupTime(value) {
+  if (!value) return "";
+
+  const timeString = typeof value === "string" ? value : String(value);
+
+  const [hourString, minute = "00"] = timeString.split(":");
+
+  const hour = Number(hourString);
+
+  const suffix = hour >= 12 ? "PM" : "AM";
+  const displayHour = hour % 12 || 12;
+
+  return `${displayHour}:${minute} ${suffix}`;
+}
+
+function formatPickupDate(value) {
+  if (!value) return "";
+
+  if (value instanceof Date) {
+    return new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }).format(value);
+  }
+
+  if (typeof value === "string") {
+    const dateOnly = value.slice(0, 10);
+
+    const [year, month, day] = dateOnly.split("-").map(Number);
+
+    const date = new Date(year, month - 1, day);
+
+    return new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }).format(date);
+  }
+
+  return String(value);
+}
+
 function OrderConfirmationPage() {
   const { orderId } = useParams();
 
@@ -62,9 +105,35 @@ function OrderConfirmationPage() {
 
         <div className="confirmation-card">
           <div className="summary-row">
+            <span>Order Number</span>
+            <strong>#{order.id}</strong>
+          </div>
+
+          <div className="summary-row">
             <span>Status</span>
             <strong>{order.status}</strong>
           </div>
+
+          <div className="summary-row">
+            <span>Order Type</span>
+            <strong>
+              {order.orderType === "pickup" ? "Pickup" : "Dine In"}
+            </strong>
+          </div>
+
+          {order.orderType === "pickup" && (
+            <>
+              <div className="summary-row">
+                <span>Pickup Date</span>
+                <strong>{formatPickupDate(order.pickupDate)}</strong>
+              </div>
+
+              <div className="summary-row">
+                <span>Pickup Time</span>
+                <strong>{formatPickupTime(order.pickupTime)}</strong>
+              </div>
+            </>
+          )}
 
           <div className="summary-row">
             <span>Subtotal</span>

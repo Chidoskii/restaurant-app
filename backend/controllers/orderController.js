@@ -1,5 +1,7 @@
 const orderService = require("../services/orderService");
 
+const businessHoursService = require("../services/businessHoursService");
+
 async function createOrder(req, res, next) {
   try {
     const {
@@ -7,8 +9,9 @@ async function createOrder(req, res, next) {
       customerEmail,
       customerPhone,
       orderType,
+      pickupDate,
+      pickupTime,
       specialInstructions,
-      requestedTime,
       items,
     } = req.body;
 
@@ -30,13 +33,44 @@ async function createOrder(req, res, next) {
       });
     }
 
+    /*
+     * Validate pickup date/time against the
+     * restaurant's available slots.
+     */
+    if (orderType === "pickup") {
+      if (!pickupDate || !pickupTime) {
+        return res.status(400).json({
+          message: "Pickup date and time are required",
+        });
+      }
+
+      const validation = await businessHoursService.validatePickupTime(
+        pickupDate,
+        pickupTime,
+      );
+
+      if (!validation.valid) {
+        return res.status(400).json({
+          message: validation.message,
+        });
+      }
+    }
+
     const result = await orderService.createOrder({
       customerName: customerName.trim(),
+
       customerEmail: customerEmail?.trim() || null,
+
       customerPhone: customerPhone?.trim() || null,
+
       orderType,
+
+      pickupDate: orderType === "pickup" ? pickupDate : null,
+
+      pickupTime: orderType === "pickup" ? pickupTime : null,
+
       specialInstructions: specialInstructions?.trim() || null,
-      requestedTime: requestedTime || null,
+
       items,
     });
 

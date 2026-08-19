@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { useCart } from "../context/CartContext";
 import { createOrder } from "../services/orderService";
+import { getPickupAvailability } from "../services/businessHoursService";
 
 function CheckoutPage() {
   const { cartItems, cartSubtotal, clearCart } = useCart();
@@ -14,13 +15,52 @@ function CheckoutPage() {
     customerEmail: "",
     customerPhone: "",
     orderType: "pickup",
-    requestedTime: "",
+    pickupDate: "",
+    pickupTime: "",
     specialInstructions: "",
   });
 
   const [submitting, setSubmitting] = useState(false);
 
+  const [pickupSlots, setPickupSlots] = useState([]);
+
+  const [loadingSlots, setLoadingSlots] = useState(false);
+
+  const [slotMessage, setSlotMessage] = useState("");
+
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (formData.orderType !== "pickup" || !formData.pickupDate) {
+      setPickupSlots([]);
+      return;
+    }
+
+    async function loadPickupSlots() {
+      try {
+        setLoadingSlots(true);
+        setSlotMessage("");
+
+        const availability = await getPickupAvailability(formData.pickupDate);
+
+        setPickupSlots(availability.slots);
+
+        if (availability.isClosed) {
+          setSlotMessage("The restaurant is closed on this day.");
+        } else if (availability.slots.length === 0) {
+          setSlotMessage("There are no pickup times available for this day.");
+        }
+      } catch (error) {
+        console.error(error);
+        setSlotMessage("Pickup times could not be loaded.");
+        setPickupSlots([]);
+      } finally {
+        setLoadingSlots(false);
+      }
+    }
+
+    loadPickupSlots();
+  }, [formData.orderType, formData.pickupDate]);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -44,10 +84,30 @@ function CheckoutPage() {
     try {
       setSubmitting(true);
 
-      const orderPayload = {
-        ...formData,
+      let requestedTime = null;
 
-        requestedTime: formData.requestedTime || null,
+      if (formData.orderType === "pickup") {
+        if (!formData.pickupDate || !formData.pickupTime) {
+          setError("Please select a pickup date and time.");
+          return;
+        }
+
+        requestedTime = `${formData.pickupDate}T${formData.pickupTime}:00`;
+      }
+
+      const orderPayload = {
+        customerName: formData.customerName,
+        customerEmail: formData.customerEmail,
+        customerPhone: formData.customerPhone,
+        orderType: formData.orderType,
+
+        pickupDate:
+          formData.orderType === "pickup" ? formData.pickupDate : null,
+
+        pickupTime:
+          formData.orderType === "pickup" ? formData.pickupTime : null,
+
+        specialInstructions: formData.specialInstructions,
 
         items: cartItems.map((item) => ({
           menuItemId: item.id,
@@ -72,6 +132,29 @@ function CheckoutPage() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  function getTodayDateString() {
+    const formatter = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Los_Angeles",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+
+    return formatter.format(new Date());
+  }
+
+  function formatPickupTime(time) {
+    const [hourString, minute] = time.split(":");
+
+    const hour = Number(hourString);
+
+    const suffix = hour >= 12 ? "PM" : "AM";
+
+    const displayHour = hour % 12 || 12;
+
+    return `${displayHour}:${minute} ${suffix}`;
   }
 
   if (cartItems.length === 0) {
@@ -161,13 +244,63 @@ function CheckoutPage() {
               <div className="form-group">
                 <label htmlFor="requestedTime">Requested Pickup Time</label>
 
-                <input
-                  id="requestedTime"
-                  name="requestedTime"
-                  type="datetime-local"
-                  value={formData.requestedTime}
-                  onChange={handleChange}
-                />
+                {formData.orderType === "pickup" && (
+                  <>
+                    <div className="form-group">
+                      <label htmlFor="pickupDate">Pickup Date</label>
+
+                      <input
+                        id="pickupDate"
+                        name="pickupDate"
+                        type="date"
+                        required
+                        min={getTodayDateString()}
+                        value={formData.pickupDate}
+                        onChange={(event) => {
+                          setFormData((current) => ({
+                            ...current,
+                            pickupDate: event.target.value,
+                            pickupTime: "",
+                          }));
+                        }}
+                      />
+                    </div>
+
+                    {formData.pickupDate && (
+                      <div className="form-group">
+                        <label>Pickup Time</label>
+
+                        {loadingSlots && <p>Loading pickup times...</p>}
+
+                        {slotMessage && <p>{slotMessage}</p>}
+
+                        {!loadingSlots && pickupSlots.length > 0 && (
+                          <div className="pickup-slots">
+                            {pickupSlots.map((time) => (
+                              <button
+                                key={time}
+                                type="button"
+                                className={
+                                  formData.pickupTime === time
+                                    ? "pickup-slot pickup-slot-active"
+                                    : "pickup-slot"
+                                }
+                                onClick={() =>
+                                  setFormData((current) => ({
+                                    ...current,
+                                    pickupTime: time,
+                                  }))
+                                }
+                              >
+                                {formatPickupTime(time)}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             )}
 
