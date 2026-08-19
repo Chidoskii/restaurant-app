@@ -86,10 +86,28 @@ function OrderConfirmationPage() {
 
         <div className="confirmation-items">
           {order.items.map((item) => (
-            <div key={item.id} className="checkout-summary-item">
-              <span>
-                {item.quantity} × {item.itemName}
-              </span>
+            <div key={item.id} className="confirmation-order-item">
+              <div>
+                <strong>
+                  {item.quantity} × {item.itemName}
+                </strong>
+
+                {item.options?.length > 0 && (
+                  <ul className="cart-item-options">
+                    {item.options.map((option) => (
+                      <li key={option.optionId}>
+                        {option.groupName}: {option.optionName}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {item.specialInstructions && (
+                  <p className="order-item-note">
+                    <strong>Note:</strong> {item.specialInstructions}
+                  </p>
+                )}
+              </div>
 
               <strong>
                 ${(Number(item.unitPrice) * item.quantity).toFixed(2)}
