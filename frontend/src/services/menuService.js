@@ -19,3 +19,9 @@ export async function getMenuItemById(id) {
   const response = await api.get(`/menu/${id}`);
   return response.data;
 }
+
+export async function getMenuItemOptions(id) {
+  const response = await api.get(`/menu/${id}/options`);
+
+  return response.data;
+}

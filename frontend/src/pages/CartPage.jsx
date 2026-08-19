@@ -33,23 +33,35 @@ function CartPage() {
         <div className="cart-layout">
           <div className="cart-items">
             {cartItems.map((item) => {
-              const displayedPrice =
-                item.specialPrice !== null && item.specialPrice !== undefined
-                  ? item.specialPrice
-                  : item.price;
+              const displayedPrice = Number(item.calculatedPrice);
 
               return (
-                <article key={item.id} className="cart-item">
+                <article key={item.cartId} className="cart-item">
                   <div className="cart-item-info">
                     <h2>{item.name}</h2>
-
-                    <p>${Number(displayedPrice).toFixed(2)} each</p>
+                    {item.selectedOptions?.length > 0 && (
+                      <ul className="cart-item-options">
+                        {item.selectedOptions.map((option) => (
+                          <li key={option.optionId}>
+                            {option.groupName}: {option.optionName}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    {item.specialInstructions && (
+                      <p>
+                        <strong>Note:</strong> {item.specialInstructions}
+                      </p>
+                    )}
+                    <p>${displayedPrice.toFixed(2)} each</p>
                   </div>
 
                   <div className="quantity-control">
                     <button
                       type="button"
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      onClick={() =>
+                        updateQuantity(item.cartId, item.quantity - 1)
+                      }
                     >
                       −
                     </button>
@@ -58,7 +70,9 @@ function CartPage() {
 
                     <button
                       type="button"
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      onClick={() =>
+                        updateQuantity(item.cartId, item.quantity + 1)
+                      }
                     >
                       +
                     </button>
@@ -71,7 +85,7 @@ function CartPage() {
                   <button
                     type="button"
                     className="remove-button"
-                    onClick={() => removeFromCart(item.id)}
+                    onClick={() => removeFromCart(item.cartId)}
                   >
                     Remove
                   </button>

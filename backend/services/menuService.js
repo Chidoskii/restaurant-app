@@ -103,9 +103,76 @@ async function findMenuItemById(menuItemId) {
   return rows[0] ?? null;
 }
 
+async function findOptionsByMenuItemId(menuItemId) {
+  const [rows] = await pool.execute(
+    `
+      SELECT
+        og.id AS groupId,
+        og.name AS groupName,
+        og.selection_type AS selectionType,
+        og.is_required AS isRequired,
+        og.min_selections AS minSelections,
+        og.max_selections AS maxSelections,
+
+        o.id AS optionId,
+        o.name AS optionName,
+        o.price_adjustment AS priceAdjustment,
+        o.is_default AS isDefault
+
+      FROM menu_item_option_groups miog
+
+      INNER JOIN option_groups og
+        ON og.id = miog.option_group_id
+
+      INNER JOIN options o
+        ON o.option_group_id = og.id
+
+      WHERE miog.menu_item_id = ?
+        AND og.is_active = TRUE
+        AND o.is_active = TRUE
+
+      ORDER BY
+        og.display_order,
+        o.display_order,
+        o.name
+    `,
+    [menuItemId],
+  );
+
+  const groups = [];
+
+  for (const row of rows) {
+    let group = groups.find((item) => item.id === row.groupId);
+
+    if (!group) {
+      group = {
+        id: row.groupId,
+        name: row.groupName,
+        selectionType: row.selectionType,
+        isRequired: Boolean(row.isRequired),
+        minSelections: row.minSelections,
+        maxSelections: row.maxSelections,
+        options: [],
+      };
+
+      groups.push(group);
+    }
+
+    group.options.push({
+      id: row.optionId,
+      name: row.optionName,
+      priceAdjustment: Number(row.priceAdjustment),
+      isDefault: Boolean(row.isDefault),
+    });
+  }
+
+  return groups;
+}
+
 module.exports = {
   findAvailableMenuItems,
   findTodaysSpecials,
   findFeaturedItems,
   findMenuItemById,
+  findOptionsByMenuItemId,
 };

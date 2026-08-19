@@ -19,14 +19,16 @@ export function CartProvider({ children }) {
   }, [cartItems]);
 
   function addToCart(item) {
+    const cartId = createCartId(item);
+
     setCartItems((currentItems) => {
       const existingItem = currentItems.find(
-        (cartItem) => cartItem.id === item.id,
+        (cartItem) => cartItem.cartId === cartId,
       );
 
       if (existingItem) {
         return currentItems.map((cartItem) =>
-          cartItem.id === item.id
+          cartItem.cartId === cartId
             ? {
                 ...cartItem,
                 quantity: cartItem.quantity + 1,
@@ -39,32 +41,28 @@ export function CartProvider({ children }) {
         ...currentItems,
         {
           ...item,
+          cartId,
           quantity: 1,
         },
       ];
     });
   }
 
-  function removeFromCart(itemId) {
+  function removeFromCart(cartId) {
     setCartItems((currentItems) =>
-      currentItems.filter((item) => item.id !== itemId),
+      currentItems.filter((item) => item.cartId !== cartId),
     );
   }
 
-  function updateQuantity(itemId, quantity) {
+  function updateQuantity(cartId, quantity) {
     if (quantity <= 0) {
-      removeFromCart(itemId);
+      removeFromCart(cartId);
       return;
     }
 
     setCartItems((currentItems) =>
       currentItems.map((item) =>
-        item.id === itemId
-          ? {
-              ...item,
-              quantity,
-            }
-          : item,
+        item.cartId === cartId ? { ...item, quantity } : item,
       ),
     );
   }
@@ -80,14 +78,10 @@ export function CartProvider({ children }) {
 
   const cartSubtotal = useMemo(
     () =>
-      cartItems.reduce((total, item) => {
-        const price =
-          item.specialPrice !== null && item.specialPrice !== undefined
-            ? item.specialPrice
-            : item.price;
-
-        return total + Number(price) * item.quantity;
-      }, 0),
+      cartItems.reduce(
+        (total, item) => total + Number(item.calculatedPrice) * item.quantity,
+        0,
+      ),
     [cartItems],
   );
 
@@ -112,4 +106,15 @@ export function useCart() {
   }
 
   return context;
+}
+
+function createCartId(item) {
+  const optionIds = (item.selectedOptions || [])
+    .map((option) => option.optionId)
+    .sort((a, b) => a - b)
+    .join("-");
+
+  const instructions = item.specialInstructions || "";
+
+  return `${item.id}-${optionIds}-${instructions}`;
 }

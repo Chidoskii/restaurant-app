@@ -51,9 +51,28 @@ async function getMenuItemById(req, res, next) {
   }
 }
 
+async function getMenuItemOptions(req, res, next) {
+  try {
+    const menuItemId = Number(req.params.id);
+
+    if (!Number.isInteger(menuItemId) || menuItemId <= 0) {
+      return res.status(400).json({
+        message: "Invalid menu item ID",
+      });
+    }
+
+    const options = await menuService.findOptionsByMenuItemId(menuItemId);
+
+    res.json(options);
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   getMenu,
   getTodaysMenu,
   getFeaturedItems,
   getMenuItemById,
+  getMenuItemOptions,
 };

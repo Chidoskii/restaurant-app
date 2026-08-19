@@ -52,6 +52,12 @@ function CheckoutPage() {
         items: cartItems.map((item) => ({
           menuItemId: item.id,
           quantity: item.quantity,
+
+          optionIds: (item.selectedOptions || []).map(
+            (option) => option.optionId,
+          ),
+
+          specialInstructions: item.specialInstructions || null,
         })),
       };
 
